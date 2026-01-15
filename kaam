@@ -1,0 +1,9 @@
+ <div class="details">
+          <div>Code: ${t.CODE}</div>
+          <div>Tyre: ₹${t.TYRE}</div>
+          <div>Tube: ${t.TUBE || "-"}</div>
+          <div>Set: ₹${t.SET}</div>
+          <div>TD: ${t.TD}</div>
+          <div>NBP: ₹${t.NBP}</div>
+           <div>NBP: ₹${t.NBP}</div>
+        </div>

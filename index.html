@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>RateBox</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="logo">
+       <img src="icons/icon.png" class="icon" alt="RateBox">
+      <span class="name">RateBox</span>
+    </div>
+
+    <div class="search-box">
+      <input id="search" placeholder="Search tyre size (21575r15)" />
+      <button id="clear">✕</button>
+      <button id="sortBtn" class="icon-btn">
+  ⬍
+</button>
+
+    </div>
+  
+
+    <button id="installBtn" class="install hidden">
+  ⬇️ Install App
+</button>
+
+  </header>
+
+  <main id="results" class="home">
+    <div class="welcome">
+      <h2>Quick Tyre Search</h2>
+      <p>Type tyre size to see latest prices instantly.</p>
+    </div>
+  </main>
+  <div id="sortPanel" class="sort-panel hidden">
+  <div class="sort-item" data-sort="priceLow">Price: Low → High</div>
+  <div class="sort-item" data-sort="priceHigh">Price: High → Low</div>
+  <div class="sort-item" data-sort="tubeless">Tubeless (TL)</div>
+  <div class="sort-item" data-sort="tubetype">Tube Type (TT)</div>
+  <div class="sort-item" data-sort="newest">Newest Code</div>
+</div>
+
+
+  <script src="app.js"></script>
+</body>
+
+</html>
