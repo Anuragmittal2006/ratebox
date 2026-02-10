@@ -1,5 +1,5 @@
 /***********************
- * PWA INSTALL LOGIC
+ * PWA INSTALL
  ***********************/
 let deferredPrompt;
 const installBtn = document.getElementById("installBtn");
@@ -10,17 +10,16 @@ window.addEventListener("beforeinstallprompt", e => {
   installBtn.classList.remove("hidden");
 });
 
-installBtn.addEventListener("click", async () => {
+installBtn.onclick = async () => {
   if (!deferredPrompt) return;
   deferredPrompt.prompt();
   await deferredPrompt.userChoice;
-  deferredPrompt = null;
   installBtn.classList.add("hidden");
-});
+};
 
 
 /***********************
- * BASIC ELEMENTS
+ * ELEMENTS
  ***********************/
 const search = document.getElementById("search");
 const clearBtn = document.getElementById("clear");
@@ -40,19 +39,18 @@ const normalize = str =>
 
 
 /***********************
- * DATA LOAD
+ * DATA
  ***********************/
-let tyres = [];
-
-fetch("tyres.json")
-  .then(res => res.json())
-  .then(data => tyres = data);
-
-
-/***********************
- * SORT STATE
- ***********************/
+let allData = {};
+let activeCategory = "all";
 let activeSort = "";
+
+fetch("data.json")
+  .then(r => r.json())
+  .then(d => {
+    allData = d;
+    createCategoryButtons();
+  });
 
 
 /***********************
@@ -60,93 +58,129 @@ let activeSort = "";
  ***********************/
 search.addEventListener("input", render);
 
-clearBtn.addEventListener("click", () => {
+clearBtn.onclick = () => {
   search.value = "";
   activeSort = "";
+
   results.className = "home";
   results.innerHTML = `
     <div class="welcome">
       <h2>Quick Price Search</h2>
-      <p>Type size or name to see prices instantly.</p>
+      <p>Type tyre size to see prices instantly.</p>
     </div>
   `;
-});
+};
 
-sortBtn.addEventListener("click", () => {
-  if (!search.value) return;   // no sort without search
+sortBtn.onclick = () => {
+  if (!search.value) return;
   sortPanel.classList.toggle("hidden");
-});
+};
 
 document.querySelectorAll(".sort-item").forEach(item => {
-  item.addEventListener("click", () => {
+  item.onclick = () => {
     activeSort = item.dataset.sort;
     sortPanel.classList.add("hidden");
     render();
-  });
+  };
 });
 
 
 /***********************
- * RENDER (UI SAFE)
+ * RENDER
  ***********************/
 function render() {
   const value = normalize(search.value);
+
   results.innerHTML = "";
   results.className = "";
 
   if (!value) return;
 
-  // 1️⃣ base filter
-  let list = tyres.filter(t =>
-    normalize(t["SIZE/DESCRIPTION"]).includes(value)
+  let source =
+    activeCategory === "all"
+      ? Object.values(allData).flat()
+      : allData[activeCategory] || [];
+
+
+  // 🔍 FILTER
+  let list = source.filter(t =>
+    normalize(t.size).includes(value)
   );
 
-  // 2️⃣ sorting / filtering (logic only)
-  if (activeSort === "priceLow") {
-    list.sort((a, b) => a.Invoice - b.Invoice);
-  }
 
-  if (activeSort === "priceHigh") {
-    list.sort((a, b) => b.Invoice - a.Invoice);
-  }
+  // 🔽 SORTS
+  if (activeSort === "priceLow")
+    list.sort((a, b) => a.invoice - b.invoice);
 
-  if (activeSort === "tubeless") {
-    list = list.filter(t => /tl/i.test(t["SIZE/DESCRIPTION"]));
-  }
+  if (activeSort === "priceHigh")
+    list.sort((a, b) => b.invoice - a.invoice);
 
-  if (activeSort === "tubetype") {
-    list = list.filter(t => /tt/i.test(t["SIZE/DESCRIPTION"]));
-  }
+  if (activeSort === "tubeless")
+    list = list.filter(t => /tl/i.test(t.size));
 
-  if (activeSort === "newest") {
-    list.sort((a, b) => b.CODE - a.CODE);
-  }
+  if (activeSort === "tubetype")
+    list = list.filter(t => /tt/i.test(t.size));
 
-  // 3️⃣ UI render (UNCHANGED STRUCTURE)
+  if (activeSort === "newest")
+    list.sort((a, b) => b.code - a.code);
+
+
+  // ⭐ highlight cheapest
+  const cheapest = Math.min(...list.map(x => x.invoice));
+
+
+  // 🎨 UI
   list.forEach(t => {
     const card = document.createElement("div");
     card.className = "card";
 
+    if (t.invoice === cheapest)
+      card.classList.add("cheapest");
+
     card.innerHTML = `
       <div class="card-header">
-        <span>${t["SIZE/DESCRIPTION"]}</span>
-        <span class="price">₹${t.Invoice}</span>
+        <span>${t.size}</span>
+        <span class="price">₹${t.invoice}</span>
       </div>
+
       <div class="details">
-        <div>Code: ${t.CODE}</div>
-        <div>Tyre: ₹${t.TYRE}</div>
-        <div>Tube: ${t.TUBE || "-"}</div>
-        <div>Set: ₹${t.SET}</div>
-        <div>TD: ${t.TD}</div>
-        <div>NBP: ₹${t.NBP}</div>
+        <div>Code: ${t.code}</div>
+        <div>Category: ${activeCategory.toUpperCase()}</div>
       </div>
     `;
 
-    card.querySelector(".card-header")
-      .onclick = () => card.classList.toggle("open");
+    card.querySelector(".card-header").onclick =
+      () => card.classList.toggle("open");
 
     results.appendChild(card);
   });
 }
 
-//iska icon do, future ke hisaab se ki isme hum apni shop pr mozood aur kisi cheez ki bhi prices list kr paye, tb hum isme upr toggle bhi bna denge for specific search ki like jk tyres, pipes, lohe hi chaddar etc, to icon usi hisaab se design krna
+
+/***********************
+ * CATEGORY BUTTONS
+ ***********************/
+function createCategoryButtons() {
+  const container = document.getElementById("categories");
+
+  const keys = ["all", ...Object.keys(allData)];
+
+  keys.forEach(k => {
+    const btn = document.createElement("div");
+    btn.className = "cat-btn";
+    btn.innerText = k.toUpperCase();
+
+    btn.onclick = () => {
+      activeCategory = k;
+
+      document.querySelectorAll(".cat-btn")
+        .forEach(b => b.classList.remove("active"));
+
+      btn.classList.add("active");
+
+      render();
+    };
+
+    container.appendChild(btn);
+  });
+}

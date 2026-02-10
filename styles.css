@@ -163,4 +163,23 @@ body {
   width: 28px;
   height: 28px;
 }
+.categories {
+  display: flex;
+  overflow-x: auto;
+  gap: 8px;
+  padding: 10px;
+}
+
+.cat-btn {
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: #2563eb;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.cat-btn.active {
+  background: #0c255b;
+  color: white;
+}
 
