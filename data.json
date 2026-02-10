@@ -3380,17 +3380,7 @@
       "nbp": 0
     }
   ],
-  "pcuv": [
-    {
-      "code": "",
-      "size": "",
-      "invoice": 0,
-      "tyre": 0,
-      "tube": 0,
-      "set": 0,
-      "nbp": 0
-    }
-  ],
+ 
   "truck": [
     {
       "code": 106296,
@@ -4212,7 +4202,7 @@
       "nbp": 0
     }
   ],
-  "sheet1": [
+  "pcuv": [
     {
       "code": "",
       "size": "",
